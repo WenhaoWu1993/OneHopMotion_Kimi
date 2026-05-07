@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1260">
+  <defs>
+    <radialGradient id="space" cx="56%" cy="28%" r="84%">
+      <stop offset="0" stop-color="#f3cfff"/>
+      <stop offset="0.36" stop-color="#7a5ee5"/>
+      <stop offset="0.7" stop-color="#26326e"/>
+      <stop offset="1" stop-color="#080d22"/>
+    </radialGradient>
+    <radialGradient id="planet" cx="38%" cy="36%" r="68%">
+      <stop offset="0" stop-color="#fff8ff"/>
+      <stop offset="0.34" stop-color="#d99dff"/>
+      <stop offset="0.68" stop-color="#624ec9"/>
+      <stop offset="1" stop-color="#222559"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="15"/></filter>
+  </defs>
+  <rect width="900" height="1260" fill="url(#space)"/>
+  <g fill="#fff" opacity=".72">
+    <circle cx="90" cy="250" r="2"/><circle cx="186" cy="120" r="4"/><circle cx="720" cy="240" r="3"/>
+    <circle cx="790" cy="560" r="2"/><circle cx="538" cy="734" r="3"/><circle cx="306" cy="664" r="2"/>
+  </g>
+  <path d="M110 280c190-110 434-88 666 68" fill="none" stroke="#f2b3ff" stroke-width="80" opacity=".22" filter="url(#soft)"/>
+  <ellipse cx="476" cy="516" rx="382" ry="382" fill="url(#planet)"/>
+  <path d="M80 500c226-82 532-74 754 24" fill="none" stroke="#ffffff" stroke-width="40" opacity=".28" filter="url(#soft)"/>
+  <path d="M188 620c170 46 372 40 552-20" fill="none" stroke="#ffbddf" stroke-width="28" opacity=".23"/>
+</svg>

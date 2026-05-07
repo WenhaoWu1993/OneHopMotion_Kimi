@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1260">
+  <defs>
+    <radialGradient id="sky" cx="42%" cy="20%" r="84%">
+      <stop offset="0" stop-color="#fff3c8"/>
+      <stop offset="0.34" stop-color="#e9977f"/>
+      <stop offset="0.68" stop-color="#5b82b9"/>
+      <stop offset="1" stop-color="#14243f"/>
+    </radialGradient>
+    <radialGradient id="planet" cx="42%" cy="36%" r="64%">
+      <stop offset="0" stop-color="#fff8dd"/>
+      <stop offset="0.42" stop-color="#f6bd78"/>
+      <stop offset="0.72" stop-color="#cc6e73"/>
+      <stop offset="1" stop-color="#573c72"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="11"/></filter>
+  </defs>
+  <rect width="900" height="1260" fill="url(#sky)"/>
+  <g opacity=".6">
+    <circle cx="104" cy="156" r="3" fill="#fff"/>
+    <circle cx="742" cy="214" r="4" fill="#fff"/>
+    <circle cx="668" cy="420" r="2" fill="#fff"/>
+    <circle cx="236" cy="500" r="3" fill="#fff"/>
+    <circle cx="810" cy="602" r="2" fill="#fff"/>
+  </g>
+  <ellipse cx="460" cy="450" rx="370" ry="370" fill="url(#planet)"/>
+  <path d="M95 462c184-92 486-126 720-70" fill="none" stroke="#fff6dc" stroke-width="38" opacity=".32" filter="url(#soft)"/>
+  <path d="M132 560c188 46 416 42 650-34" fill="none" stroke="#6f456e" stroke-width="30" opacity=".2"/>
+  <ellipse cx="410" cy="366" rx="230" ry="82" fill="#fff7d1" opacity=".22" filter="url(#soft)"/>
+</svg>

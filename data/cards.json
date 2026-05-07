@@ -1,0 +1,82 @@
+[
+  {
+    "id": "dawn",
+    "label": "圆脸憨憨",
+    "sub-label": "主题",
+    "label-fill": "white",
+    "image": "./assets/cards/theme.svg",
+    "pose": {
+      "x": "calc(-50% - 75px)",
+      "y": "calc(-50% - 180px)",
+      "z": "-26px",
+      "r": "-16deg",
+      "rx": "12deg",
+      "ry": "20deg",
+      "s": 0.77,
+      "blur": "1.2px",
+      "fade": 0.86,
+      "sat": 0.98,
+      "parallax": 9
+    }
+  },
+  {
+    "id": "blue-planet",
+    "label": "Eve Chris",
+    "sub-label": "181 7446 8740",
+    "label-fill": "white",
+    "image": "./assets/cards/contact.svg",
+    "pose": {
+      "x": "calc(-50% - 50px)",
+      "y": "calc(-50% - 50px)",
+      "z": "86px",
+      "r": "-6deg",
+      "rx": "0deg",
+      "ry": "0deg",
+      "s": 1.02,
+      "blur": "0px",
+      "fade": 1,
+      "sat": 1.04,
+      "parallax": 14
+    }
+  },
+  {
+    "id": "nebula",
+    "label": "WLAN",
+    "sub-label": "Huawei-guest",
+    "label-fill": "white",
+    "image": "./assets/cards/wifi.svg",
+    "pose": {
+      "x": "calc(-50% + 92px)",
+      "y": "calc(-50% - 122px)",
+      "z": "-128px",
+      "r": "9deg",
+      "rx": "0deg",
+      "ry": "0deg",
+      "s": 0.73,
+      "blur": "2.7px",
+      "fade": 0.51,
+      "sat": 0.8,
+      "parallax": 4
+    }
+  },
+  {
+    "id": "aurora",
+    "label": "",
+    "sub-label": "",
+    "label-fill": "",
+    "image": "./assets/cards/精彩瞬间2.svg",
+    "pose": {
+      "x": "calc(-50% + 87px)",
+      "y": "calc(-50% + 172px)",
+      "z": "-86px",
+      "r": "11deg",
+      "rx": "0deg",
+      "ry": "0deg",
+      "s": 0.56,
+      "blur": "5.5px",
+      "fade": 0.62,
+      "sat": 0.86,
+      "parallax": 6
+    }
+  }
+]

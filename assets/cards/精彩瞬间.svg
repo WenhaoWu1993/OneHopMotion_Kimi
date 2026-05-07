@@ -1,0 +1,24 @@
+<svg width="900" height="1260" viewBox="0 0 900 1260" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_25_40)">
+<path d="M900 0H0V1260H900V0Z" fill="url(#paint0_radial_25_40)"/>
+<g opacity="0.72">
+<path d="M90 252C91.1046 252 92 251.105 92 250C92 248.895 91.1046 248 90 248C88.8954 248 88 248.895 88 250C88 251.105 88.8954 252 90 252Z" fill="white"/>
+<path d="M186 124C188.209 124 190 122.209 190 120C190 117.791 188.209 116 186 116C183.791 116 182 117.791 182 120C182 122.209 183.791 124 186 124Z" fill="white"/>
+<path d="M720 243C721.657 243 723 241.657 723 240C723 238.343 721.657 237 720 237C718.343 237 717 238.343 717 240C717 241.657 718.343 243 720 243Z" fill="white"/>
+<path d="M790 562C791.105 562 792 561.105 792 560C792 558.895 791.105 558 790 558C788.895 558 788 558.895 788 560C788 561.105 788.895 562 790 562Z" fill="white"/>
+<path d="M538 737C539.657 737 541 735.657 541 734C541 732.343 539.657 731 538 731C536.343 731 535 732.343 535 734C535 735.657 536.343 737 538 737Z" fill="white"/>
+<path d="M306 666C307.105 666 308 665.105 308 664C308 662.895 307.105 662 306 662C304.895 662 304 662.895 304 664C304 665.105 304.895 666 306 666Z" fill="white"/>
+</g>
+</g>
+<defs>
+<radialGradient id="paint0_radial_25_40" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(504 352.8) scale(756 1058.4)">
+<stop stop-color="#D9A1EB"/>
+<stop offset="0.36" stop-color="#7A5EE5"/>
+<stop offset="0.7" stop-color="#26326E"/>
+<stop offset="1" stop-color="#080D22"/>
+</radialGradient>
+<clipPath id="clip0_25_40">
+<rect width="900" height="1260" fill="white"/>
+</clipPath>
+</defs>
+</svg>

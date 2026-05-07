@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One-Hop Wormhole Layer Diagram</title>
+    <style>
+      :root {
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        color: #172033;
+        background: #eef3f9;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 28px;
+        background:
+          radial-gradient(circle at 28% 8%, rgba(255, 255, 255, 0.96), transparent 30%),
+          linear-gradient(180deg, #eaf0f7, #c6cfda);
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        line-height: 1.15;
+      }
+
+      h2 {
+        font-size: 15px;
+      }
+
+      .page {
+        display: grid;
+        gap: 22px;
+        max-width: 1280px;
+        margin: 0 auto;
+      }
+
+      .intro {
+        display: grid;
+        gap: 8px;
+      }
+
+      .intro p {
+        color: rgba(23, 32, 51, 0.66);
+        font-size: 14px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(420px, 1.05fr) minmax(330px, 0.82fr) minmax(300px, 0.72fr);
+        gap: 18px;
+        align-items: start;
+      }
+
+      .panel {
+        overflow: hidden;
+        border: 1px solid rgba(80, 96, 120, 0.18);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 18px 50px rgba(56, 70, 92, 0.16);
+      }
+
+      .panel header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 48px;
+        padding: 13px 15px;
+        border-bottom: 1px solid rgba(80, 96, 120, 0.14);
+        background: rgba(255, 255, 255, 0.62);
+      }
+
+      .panel header span {
+        color: rgba(23, 32, 51, 0.54);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .stage {
+        position: relative;
+        height: 440px;
+        background:
+          linear-gradient(rgba(34, 43, 58, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(34, 43, 58, 0.06) 1px, transparent 1px),
+          linear-gradient(180deg, #d6dee9, #aeb9c7);
+        background-size: 24px 24px, 24px 24px, auto;
+      }
+
+      .phone-top {
+        position: absolute;
+        inset: 0 0 auto;
+        height: 82px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent),
+          rgba(227, 234, 244, 0.72);
+      }
+
+      .coord {
+        position: absolute;
+        left: 50%;
+        top: 128px;
+        width: min(116%, 500px);
+        height: 190px;
+        border: 1px dashed rgba(31, 61, 103, 0.4);
+        transform: translateX(-50%);
+      }
+
+      .coord::before {
+        content: "wormhole box: width min(116%, 500px), height 190px";
+        position: absolute;
+        left: 10px;
+        top: -24px;
+        color: rgba(31, 61, 103, 0.68);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .top-line {
+        position: absolute;
+        left: 24%;
+        right: 24%;
+        top: 18px;
+        border-top: 2px solid rgba(37, 93, 155, 0.78);
+      }
+
+      .top-line::after {
+        content: "shared top: 18px";
+        position: absolute;
+        left: 50%;
+        top: -22px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(37, 93, 155, 0.12);
+        color: #255d9b;
+        font-size: 11px;
+        font-weight: 800;
+        transform: translateX(-50%);
+        white-space: nowrap;
+      }
+
+      .wormhole-demo,
+      .layer-sample {
+        position: absolute;
+        left: 50%;
+        top: 128px;
+        width: min(116%, 500px);
+        height: 190px;
+        transform: translateX(-50%);
+      }
+
+      .core,
+      .middle,
+      .outer {
+        position: absolute;
+        top: 18px;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .core {
+        left: 24%;
+        right: 24%;
+        z-index: 3;
+        height: 88px;
+        background:
+          radial-gradient(ellipse 72% 34% at 50% 20%, rgba(255, 255, 255, 0.92) 0 24%, rgba(255, 255, 255, 0.54) 50%, transparent 78%),
+          radial-gradient(ellipse 64% 38% at 50% 44%, rgba(222, 255, 243, 0.38) 0 24%, transparent 80%);
+        filter: blur(2px) saturate(1.04);
+        opacity: 0.96;
+      }
+
+      .middle {
+        left: 4%;
+        right: 4%;
+        z-index: 2;
+        height: 150px;
+        border-radius: 0;
+        background:
+          radial-gradient(ellipse 36% 20% at 50% 21%, rgba(255, 255, 255, 0.78) 0 24%, rgba(255, 255, 255, 0.32) 48%, transparent 76%),
+          radial-gradient(ellipse 50% 76% at 50% 60%, rgba(218, 255, 240, 0.38) 0 32%, rgba(222, 245, 255, 0.16) 70%, transparent 100%);
+        filter: blur(16px) saturate(1.03);
+        opacity: 0.88;
+      }
+
+      .outer {
+        left: -10%;
+        right: -10%;
+        top: -10px;
+        z-index: 1;
+        height: 210px;
+        border-radius: 0;
+        background:
+          radial-gradient(ellipse 26% 14% at 50% 20%, rgba(255, 255, 255, 0.42) 0 24%, rgba(255, 255, 255, 0.16) 50%, transparent 80%),
+          radial-gradient(ellipse 58% 100% at 50% 62%, rgba(214, 255, 239, 0.34) 0 36%, rgba(224, 240, 255, 0.16) 74%, transparent 100%);
+        filter: blur(38px);
+        opacity: 0.92;
+      }
+
+      .edge-note {
+        position: absolute;
+        left: 50%;
+        top: 156px;
+        z-index: 8;
+        display: grid;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        place-items: center;
+        border: 1px solid rgba(37, 93, 155, 0.32);
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.82);
+        color: rgba(23, 32, 51, 0.76);
+        font-size: 0;
+        font-weight: 800;
+        transform: translateX(-50%);
+        cursor: help;
+      }
+
+      .edge-note::before {
+        content: "?";
+        color: #255d9b;
+        font-size: 14px;
+      }
+
+      .edge-note::after {
+        content: attr(data-note);
+        position: absolute;
+        left: 50%;
+        top: 36px;
+        width: 248px;
+        padding: 9px 10px;
+        border: 1px solid rgba(37, 93, 155, 0.2);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 12px 28px rgba(43, 63, 91, 0.18);
+        color: rgba(23, 32, 51, 0.76);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.35;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateX(-50%) translateY(-4px);
+        transition: opacity 160ms ease, transform 160ms ease;
+      }
+
+      .edge-note:hover::after,
+      .edge-note:focus-visible::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .stack {
+        display: grid;
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .mini {
+        position: relative;
+        height: 122px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: linear-gradient(180deg, #c9d3df, #aab6c4);
+      }
+
+      .mini .layer-sample {
+        top: 8px;
+        width: 100%;
+        transform: translateX(-50%) scale(0.82);
+      }
+
+      .mini-title {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 1px 7px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .mini-title span:last-child {
+        color: rgba(23, 32, 51, 0.52);
+        font-weight: 700;
+      }
+
+      .specs {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .spec {
+        padding: 12px;
+        border: 1px solid rgba(80, 96, 120, 0.14);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .spec strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .spec p {
+        color: rgba(23, 32, 51, 0.64);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .warn {
+        border-color: rgba(217, 119, 6, 0.28);
+        background: rgba(255, 247, 237, 0.72);
+      }
+
+      .legend {
+        position: absolute;
+        left: 18px;
+        bottom: 18px;
+        display: grid;
+        gap: 6px;
+        color: rgba(23, 32, 51, 0.66);
+        font-size: 12px;
+      }
+
+      .legend i {
+        display: inline-block;
+        width: 18px;
+        height: 8px;
+        margin-right: 7px;
+        border-radius: 999px;
+        vertical-align: middle;
+      }
+
+      .core-chip { background: rgba(255, 255, 255, 0.94); }
+      .middle-chip { background: rgba(218, 255, 240, 0.58); }
+      .outer-chip { background: rgba(224, 240, 255, 0.58); }
+
+      @media (max-width: 1120px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <h1>One-Hop 虫洞绘制示意图</h1>
+        <p>这张图拆的是当前实现：三层光都在同一个虫洞容器里，核心问题集中在「上缘共享」「扩散层可见范围」「遮罩是否产生边缘」。</p>
+      </section>
+
+      <section class="grid">
+        <article class="panel">
+          <header>
+            <h2>合成视图</h2>
+            <span>当前虫洞的图层叠法</span>
+          </header>
+          <div class="stage">
+            <div class="phone-top"></div>
+            <div class="coord">
+              <div class="top-line"></div>
+            </div>
+            <div class="wormhole-demo">
+              <div class="outer"></div>
+              <div class="middle"></div>
+              <div class="core"></div>
+            </div>
+            <button class="edge-note" type="button" data-note="理想状态：三层共享同一条上缘弧线；只有亮度、模糊度和向下扩散范围不同。" aria-label="查看理想状态说明"></button>
+            <div class="legend">
+              <div><i class="core-chip"></i>最清晰核心</div>
+              <div><i class="middle-chip"></i>中层扩散</div>
+              <div><i class="outer-chip"></i>外层光雾</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <header>
+            <h2>图层拆解</h2>
+            <span>从上到下逐层叠加</span>
+          </header>
+          <div class="stack">
+            <div>
+              <div class="mini-title"><span>Layer 1: Core</span><span>blur 2px</span></div>
+              <div class="mini"><div class="layer-sample"><div class="core"></div></div></div>
+            </div>
+            <div>
+              <div class="mini-title"><span>Layer 2: Middle glow</span><span>blur 16px</span></div>
+              <div class="mini"><div class="layer-sample"><div class="middle"></div><div class="core"></div></div></div>
+            </div>
+            <div>
+              <div class="mini-title"><span>Layer 3: Outer haze</span><span>blur 38px</span></div>
+              <div class="mini"><div class="layer-sample"><div class="outer"></div><div class="middle"></div><div class="core"></div></div></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <header>
+            <h2>参数和问题点</h2>
+            <span>哪里容易出错</span>
+          </header>
+          <div class="specs">
+            <div class="spec">
+              <strong>容器</strong>
+              <p>`.wormhole`: width min(116%, 500px), height 190px, translateY(-60px)。所有光层都挂在这个坐标里。</p>
+            </div>
+            <div class="spec">
+              <strong>核心层</strong>
+              <p>`::before`: left/right 24%, top 18px, height 88px, blur 2px。它定义现在最清楚的上缘。</p>
+            </div>
+            <div class="spec">
+              <strong>扩散层</strong>
+              <p>`::after` 和 `span`: 中层/外层使用更大画布和更强 blur。它们现在为了去硬边，已经不再严格等同核心层的几何。</p>
+            </div>
+            <div class="spec warn">
+              <strong>当前疑点</strong>
+              <p>如果扩散层太弱，会只剩核心；如果扩散层画布太大或 mask 太紧，会出现矩形边或大圆弧。更稳的下一步是让每一层使用同一条 SVG/path mask，上缘完全一致，只向下扩展 alpha。</p>
+            </div>
+            <div class="spec warn">
+              <strong>建议修法</strong>
+              <p>把“椭圆层”改成“同一个半穹 mask 的三份副本”：核心副本 blur 2px，中层 blur 12-16px，外层 blur 28-38px；只改变垂直 alpha，不改变上缘几何。</p>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

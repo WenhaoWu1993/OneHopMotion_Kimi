@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ripple Lab</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="lab-shell">
+      <section class="phone" aria-label="水波纹实验">
+        <img class="wallpaper" src="../screen.jpg" alt="" draggable="false" />
+        <canvas id="rippleCanvas" class="ripple-canvas" aria-hidden="true"></canvas>
+      </section>
+
+      <div class="controls">
+        <button id="triggerRipple" type="button">触发水波</button>
+        <span>按 Space</span>
+      </div>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
