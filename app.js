@@ -577,14 +577,11 @@ function createCards() {
     node.style.setProperty("--enter-delay", `${index * 70}ms`);
     node.style.setProperty("--label-fill", card.labelFill || "#111317");
 
-    const inner = document.createElement("div");
-    inner.className = "card-inner";
-
     const background = document.createElement("div");
     background.className = "card-bg";
     background.setAttribute("aria-hidden", "true");
 
-    inner.append(background);
+    node.append(background);
     if (card.label || card.subLabel) {
       const label = document.createElement("div");
       label.className = `card-label${card.subLabel ? " has-sub-label" : ""}`;
@@ -600,9 +597,8 @@ function createCards() {
         subLabelText.textContent = card.subLabel;
         label.append(subLabelText);
       }
-      inner.append(label);
+      node.append(label);
     }
-    node.append(inner);
     node.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       if (activeIndex !== null) {
