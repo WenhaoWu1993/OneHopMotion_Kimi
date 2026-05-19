@@ -577,11 +577,14 @@ function createCards() {
     node.style.setProperty("--enter-delay", `${index * 70}ms`);
     node.style.setProperty("--label-fill", card.labelFill || "#111317");
 
+    const inner = document.createElement("div");
+    inner.className = "card-inner";
+
     const background = document.createElement("div");
     background.className = "card-bg";
     background.setAttribute("aria-hidden", "true");
 
-    node.append(background);
+    inner.append(background);
     if (card.label || card.subLabel) {
       const label = document.createElement("div");
       label.className = `card-label${card.subLabel ? " has-sub-label" : ""}`;
@@ -597,8 +600,9 @@ function createCards() {
         subLabelText.textContent = card.subLabel;
         label.append(subLabelText);
       }
-      node.append(label);
+      inner.append(label);
     }
+    node.append(inner);
     node.addEventListener("pointerdown", (event) => {
       event.preventDefault();
       if (activeIndex !== null) {
@@ -842,14 +846,19 @@ async function enableIMU() {
   if (granted) {
     imuEnabled = true;
     window.addEventListener('deviceorientation', handleDeviceOrientation);
-    if (debug) debug.textContent = 'IMU: listening...';
+    if (debug) {
+      debug.textContent = 'IMU: on';
+      debug.style.color = '#0f0';
+      window.setTimeout(() => { debug.style.opacity = '0'; }, 1200);
+    }
     if (btn) btn.style.display = 'none';
 
     window.setTimeout(() => {
       const d = document.getElementById('imuDebug');
-      if (d && d.textContent.includes('listening')) {
+      if (d && d.textContent === 'IMU: on') {
         d.textContent = 'IMU: unavailable';
         d.style.color = '#f55';
+        d.style.opacity = '1';
       }
     }, 3000);
   } else {
@@ -871,8 +880,9 @@ document.getElementById('imuBtn')?.addEventListener('click', async () => {
         imuEnabled = true;
         window.addEventListener('deviceorientation', handleDeviceOrientation);
         if (debug) {
-          debug.textContent = 'IMU: listening...';
+          debug.textContent = 'IMU: on';
           debug.style.color = '#0f0';
+          window.setTimeout(() => { debug.style.opacity = '0'; }, 1200);
         }
         document.getElementById('imuBtn').style.display = 'none';
       } else {
