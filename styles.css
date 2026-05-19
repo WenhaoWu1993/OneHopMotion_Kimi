@@ -56,12 +56,7 @@ button {
 
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(0, var(--phone-w)) minmax(260px, 340px);
-  gap: 18px;
-  align-content: center;
-  justify-items: center;
-  justify-content: center;
-  align-items: center;
+  place-items: center;
   min-height: 100vh;
   padding: 10px;
 }
@@ -80,6 +75,7 @@ button {
     0 32px 90px rgba(28, 33, 44, 0.35),
     inset 0 0 0 1px rgba(255, 255, 255, 0.42);
   isolation: isolate;
+  touch-action: manipulation;
 }
 
 .proximity-trigger {
@@ -88,6 +84,7 @@ button {
   z-index: 8;
   background: transparent;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .phone.state-3 .proximity-trigger,
@@ -756,123 +753,7 @@ button {
   font-weight: 650;
 }
 
-.demo-controls {
-  z-index: 40;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  align-items: center;
-}
 
-.side-panel {
-  display: grid;
-  width: min(340px, calc(100vw - 24px));
-  gap: 14px;
-  align-self: center;
-}
-
-.demo-controls button {
-  min-width: 108px;
-  min-height: 42px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: rgba(18, 20, 25, 0.86);
-  font-size: 15px;
-  font-weight: 800;
-  box-shadow: 0 12px 30px rgba(28, 33, 44, 0.18);
-  cursor: pointer;
-}
-
-.demo-controls button:first-child {
-  background: rgba(26, 99, 255, 0.9);
-  color: white;
-}
-
-.demo-controls button:disabled {
-  cursor: default;
-  opacity: 0.52;
-}
-
-.ripple-tuner {
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 18px 46px rgba(28, 33, 44, 0.16);
-}
-
-.ripple-tuner header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.ripple-tuner strong {
-  font-size: 15px;
-}
-
-.ripple-tuner button {
-  min-height: 32px;
-  padding: 0 13px;
-  border-radius: 999px;
-  background: rgba(26, 99, 255, 0.88);
-  color: white;
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.tuner-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px 14px;
-}
-
-.tuner-grid label {
-  display: grid;
-  gap: 6px;
-  color: rgba(18, 20, 25, 0.72);
-  font-size: 12px;
-  font-weight: 760;
-}
-
-.tuner-grid span {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.tuner-grid b {
-  color: rgba(18, 20, 25, 0.92);
-  font-variant-numeric: tabular-nums;
-}
-
-.tuner-grid input {
-  width: 100%;
-}
-
-.card-tuner-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.card-tuner-grid .wide-control {
-  grid-column: 1 / -1;
-}
-
-.card-tuner-grid select {
-  width: 100%;
-  min-height: 30px;
-  border: 0;
-  border-radius: 8px;
-  padding: 0 10px;
-  background: rgba(255, 255, 255, 0.76);
-  color: rgba(18, 20, 25, 0.92);
-  font: inherit;
-  font-weight: 800;
-}
 
 .phone.state-2 .ambient-top {
   opacity: 1;
@@ -943,6 +824,15 @@ button {
   pointer-events: auto;
 }
 
+.phone.sending-preview .hop-card.back {
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 420ms cubic-bezier(0.2, 1, 0.18, 1),
+    opacity 180ms ease,
+    filter 220ms ease;
+}
+
 .phone.state-3 .hop-card {
   animation: cards-rise-in 760ms cubic-bezier(0.19, 1, 0.22, 1) both;
   animation-delay: var(--enter-delay, 0ms);
@@ -968,17 +858,43 @@ button {
 }
 
 .phone.sent .hop-card.active {
-  transform: translate3d(calc(-50% + var(--sent-x, 0px)), -90%, 220px) rotate(0deg) scale(0.82);
+  transform: translate3d(calc(-50% + var(--sent-x, 0px)), calc(-50% - 320px), 280px) rotateX(72deg) rotateY(0deg) rotateZ(-2deg) scale(0.32);
   opacity: 0;
+  filter: blur(0px);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 20%, #000 36%);
+  mask-image: linear-gradient(180deg, transparent 0%, transparent 20%, #000 36%);
+  transition:
+    transform 720ms cubic-bezier(0.16, 1, 0.22, 1),
+    opacity 520ms ease 200ms,
+    filter 400ms ease;
+}
+
+.phone.sent .hop-card.back {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .phone.sent .share-hint {
   opacity: 0;
 }
 
-.phone.sent .sent-sheet {
+.phone.sent .wormhole {
+  animation: wormhole-ingest 760ms cubic-bezier(0.16, 1, 0.22, 1), wormhole-breathe 2200ms ease-in-out 760ms infinite;
+}
+
+.phone.sent .wormhole::before {
+  filter: blur(1.2px) saturate(1.18) brightness(1.18);
   opacity: 1;
-  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.phone.sent .wormhole::after {
+  filter: blur(20px) saturate(1.16) brightness(1.12);
+  opacity: 1;
+}
+
+.phone.sent .sent-sheet {
+  opacity: 0;
+  transform: translateX(-50%) translateY(24px) scale(0.96);
 }
 
 @keyframes wormhole-breathe {
@@ -991,6 +907,23 @@ button {
   50% {
     opacity: 0.99;
     transform: translateY(-24px) scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes wormhole-ingest {
+  0% {
+    transform: translateY(-24px) scaleX(1) scaleY(1);
+    filter: brightness(1);
+  }
+
+  46% {
+    transform: translateY(-20px) scaleX(1.05) scaleY(1.04);
+    filter: brightness(1.18);
+  }
+
+  100% {
+    transform: translateY(-24px) scaleX(1) scaleY(1);
+    filter: brightness(1);
   }
 }
 
@@ -1068,22 +1001,17 @@ button {
   }
 }
 
-@media (max-width: 820px) {
-  .app-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .side-panel {
-    width: min(760px, calc(100vw - 24px));
-  }
-
-  .tuner-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 520px) {
-  .tuner-grid {
-    grid-template-columns: 1fr;
+  .app-shell {
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .phone {
+    width: 100vw;
+    height: 100vh;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
   }
 }

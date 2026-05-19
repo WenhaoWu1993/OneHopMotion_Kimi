@@ -2,9 +2,12 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>One-Hop Motion Prototype</title>
-    <link rel="stylesheet" href="./styles.css?v=1778147940" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>One-Hop Motion</title>
+    <link rel="stylesheet" href="./styles.css?v=1779123353" />
       <meta name="ripple-settings-saved-at" content="2026-05-05T14:39:48.783Z" />
       <meta name="cards-saved-at" content="2026-05-07T09:31:50.443710Z" />
       <meta name="focus-layout-saved-at" content="2026-05-07T09:56:20.436393Z" />
@@ -81,187 +84,11 @@
           <span id="sentTitle">One-Hop</span>
         </section>
 
+        <div id="imuDebug" style="position:fixed;bottom:10px;left:10px;z-index:9999;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,0.6);color:#0f0;font-size:11px;font-family:monospace;pointer-events:none;opacity:0;transition:opacity 0.3s;">IMU: waiting...</div>
+
       </section>
-
-      <aside class="side-panel" aria-label="演示和水波参数控制">
-        <nav class="demo-controls" aria-label="One-Hop 演示控制">
-          <button id="tapHop" type="button">碰一碰</button>
-          <button id="resetDemo" type="button">reset</button>
-        </nav>
-
-        <section class="ripple-tuner" aria-label="水波参数控制">
-          <header>
-            <strong>水波参数</strong>
-            <button id="acceptRipple" type="button">accept</button>
-          </header>
-          <div class="tuner-grid">
-            <label>
-              <span>强度 <b id="bendScaleValue">1.00</b></span>
-              <input id="bendScale" type="range" min="0" max="2.4" step="0.02" value="1" />
-            </label>
-            <label>
-              <span>横向扭动 <b id="shearScaleValue">1.00</b></span>
-              <input id="shearScale" type="range" min="0" max="2.4" step="0.02" value="1" />
-            </label>
-            <label>
-              <span>高光 <b id="lightScaleValue">1.00</b></span>
-              <input id="lightScale" type="range" min="0" max="2.4" step="0.02" value="1" />
-            </label>
-            <label>
-              <span>色散 <b id="chromaScaleValue">1.00</b></span>
-              <input id="chromaScale" type="range" min="0" max="2.4" step="0.02" value="1" />
-            </label>
-            <label>
-              <span>速度 <b id="speedScaleValue">1.00</b></span>
-              <input id="speedScale" type="range" min="0.2" max="2.2" step="0.01" value="1" />
-            </label>
-            <label>
-              <span>影响范围 <b id="coverageValue">0.78</b></span>
-              <input id="coverage" type="range" min="0.16" max="1" step="0.01" value="0.78" />
-            </label>
-            <label>
-              <span>底色亮度 <b id="baseBrightnessValue">1.00</b></span>
-              <input id="baseBrightness" type="range" min="0.45" max="1.75" step="0.01" value="1" />
-            </label>
-            <label>
-              <span>伽马校正 <b id="gammaValue">1.00</b></span>
-              <input id="gamma" type="range" min="0.35" max="1.85" step="0.01" value="1" />
-            </label>
-            <label>
-              <span>暗带 <b id="shadowScaleValue">1.00</b></span>
-              <input id="shadowScale" type="range" min="0" max="2.4" step="0.02" value="1" />
-            </label>
-          </div>
-        </section>
-
-        <section class="ripple-tuner" aria-label="背景参数控制">
-          <header>
-            <strong>背景参数</strong>
-          </header>
-          <div class="tuner-grid">
-            <label>
-              <span>模糊度 <b id="backgroundBlurValue">16.00</b></span>
-              <input id="backgroundBlur" type="range" min="0" max="32" step="0.5" value="16" />
-            </label>
-            <label>
-              <span>亮度 <b id="backgroundBrightnessValue">0.78</b></span>
-              <input id="backgroundBrightness" type="range" min="0.25" max="1" step="0.01" value="0.78" />
-            </label>
-            <label>
-              <span>饱和度 <b id="backgroundSaturationValue">0.88</b></span>
-              <input id="backgroundSaturation" type="range" min="0" max="1.4" step="0.01" value="0.88" />
-            </label>
-          </div>
-        </section>
-
-        <section class="ripple-tuner" aria-label="卡片分布参数控制">
-          <header>
-            <strong>卡片分布</strong>
-            <button id="acceptCards" type="button">accept</button>
-          </header>
-          <div class="tuner-grid card-tuner-grid">
-            <label class="wide-control">
-              <span>当前卡片 <b id="cardSelectValue">蓝色星球</b></span>
-              <select id="cardSelect" aria-label="选择要调整的卡片"></select>
-            </label>
-            <label>
-              <span>X <b id="cardXValue">0</b></span>
-              <input id="cardX" type="range" min="-180" max="180" step="1" value="0" />
-            </label>
-            <label>
-              <span>Y <b id="cardYValue">0</b></span>
-              <input id="cardY" type="range" min="-180" max="240" step="1" value="0" />
-            </label>
-            <label>
-              <span>Z <b id="cardZValue">0</b></span>
-              <input id="cardZ" type="range" min="-180" max="140" step="1" value="0" />
-            </label>
-            <label>
-              <span>旋转 <b id="cardRotateValue">0</b></span>
-              <input id="cardRotate" type="range" min="-24" max="24" step="1" value="0" />
-            </label>
-            <label>
-              <span>3D X <b id="cardRotateXValue">0</b></span>
-              <input id="cardRotateX" type="range" min="-45" max="45" step="1" value="0" />
-            </label>
-            <label>
-              <span>3D Y <b id="cardRotateYValue">0</b></span>
-              <input id="cardRotateY" type="range" min="-45" max="45" step="1" value="0" />
-            </label>
-            <label>
-              <span>缩放 <b id="cardScaleValue">1.00</b></span>
-              <input id="cardScale" type="range" min="0.45" max="1.2" step="0.01" value="1" />
-            </label>
-            <label>
-              <span>模糊 <b id="cardBlurValue">0.0</b></span>
-              <input id="cardBlur" type="range" min="0" max="9" step="0.1" value="0" />
-            </label>
-            <label>
-              <span>透明度 <b id="cardFadeValue">1.00</b></span>
-              <input id="cardFade" type="range" min="0" max="1" step="0.01" value="1" />
-            </label>
-            <label>
-              <span>视差 <b id="cardParallaxValue">0</b></span>
-              <input id="cardParallax" type="range" min="0" max="20" step="1" value="0" />
-            </label>
-          </div>
-        </section>
-
-        <section class="ripple-tuner" aria-label="获焦态布局参数控制">
-          <header>
-            <strong>获焦态布局</strong>
-            <button id="acceptFocusLayout" type="button">accept</button>
-          </header>
-          <div class="tuner-grid card-tuner-grid">
-            <label class="wide-control">
-              <span>当前位置 <b id="focusSlotValue">前景</b></span>
-              <select id="focusSlotSelect" aria-label="选择要调整的获焦态位置"></select>
-            </label>
-            <label>
-              <span>X <b id="focusXValue">0</b></span>
-              <input id="focusX" type="range" min="-220" max="220" step="1" value="0" />
-            </label>
-            <label>
-              <span>Y <b id="focusYValue">0</b></span>
-              <input id="focusY" type="range" min="-260" max="180" step="1" value="0" />
-            </label>
-            <label>
-              <span>Z <b id="focusZValue">0</b></span>
-              <input id="focusZ" type="range" min="-220" max="240" step="1" value="0" />
-            </label>
-            <label>
-              <span>旋转 <b id="focusRotateValue">0</b></span>
-              <input id="focusRotate" type="range" min="-40" max="40" step="1" value="0" />
-            </label>
-            <label>
-              <span>3D X <b id="focusRotateXValue">0</b></span>
-              <input id="focusRotateX" type="range" min="-60" max="60" step="1" value="0" />
-            </label>
-            <label>
-              <span>3D Y <b id="focusRotateYValue">0</b></span>
-              <input id="focusRotateY" type="range" min="-70" max="70" step="1" value="0" />
-            </label>
-            <label>
-              <span>缩放 <b id="focusScaleValue">1.00</b></span>
-              <input id="focusScale" type="range" min="0.4" max="1.35" step="0.01" value="1" />
-            </label>
-            <label>
-              <span>模糊 <b id="focusBlurValue">0.0</b></span>
-              <input id="focusBlur" type="range" min="0" max="10" step="0.1" value="0" />
-            </label>
-            <label>
-              <span>透明度 <b id="focusFadeValue">1.00</b></span>
-              <input id="focusFade" type="range" min="0" max="1" step="0.01" value="1" />
-            </label>
-            <label>
-              <span>饱和度 <b id="focusSatValue">1.00</b></span>
-              <input id="focusSat" type="range" min="0" max="1.4" step="0.01" value="1" />
-            </label>
-          </div>
-        </section>
-      </aside>
     </main>
 
-    <script src="./app.js?v=1778147940"></script>
+    <script src="./app.js?v=1779123353"></script>
   </body>
 </html>

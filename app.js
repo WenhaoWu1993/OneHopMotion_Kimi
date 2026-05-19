@@ -5,96 +5,8 @@ const stageLabel = document.querySelector("#stageLabel");
 const proximityTrigger = document.querySelector("#proximityTrigger");
 const shareHint = document.querySelector("#shareHint");
 const sentTitle = document.querySelector("#sentTitle");
-const tapHopButton = document.querySelector("#tapHop");
-const resetDemoButton = document.querySelector("#resetDemo");
-const acceptRippleButton = document.querySelector("#acceptRipple");
-const acceptCardsButton = document.querySelector("#acceptCards");
-const acceptFocusLayoutButton = document.querySelector("#acceptFocusLayout");
-const tunerInputs = {
-  bendScale: document.querySelector("#bendScale"),
-  shearScale: document.querySelector("#shearScale"),
-  lightScale: document.querySelector("#lightScale"),
-  chromaScale: document.querySelector("#chromaScale"),
-  speedScale: document.querySelector("#speedScale"),
-  coverage: document.querySelector("#coverage"),
-  baseBrightness: document.querySelector("#baseBrightness"),
-  gamma: document.querySelector("#gamma"),
-  shadowScale: document.querySelector("#shadowScale"),
-};
-const backgroundInputs = {
-  backgroundBlur: document.querySelector("#backgroundBlur"),
-  backgroundBrightness: document.querySelector("#backgroundBrightness"),
-  backgroundSaturation: document.querySelector("#backgroundSaturation"),
-};
-const tunerReadouts = {
-  bendScale: document.querySelector("#bendScaleValue"),
-  shearScale: document.querySelector("#shearScaleValue"),
-  lightScale: document.querySelector("#lightScaleValue"),
-  chromaScale: document.querySelector("#chromaScaleValue"),
-  speedScale: document.querySelector("#speedScaleValue"),
-  coverage: document.querySelector("#coverageValue"),
-  baseBrightness: document.querySelector("#baseBrightnessValue"),
-  gamma: document.querySelector("#gammaValue"),
-  shadowScale: document.querySelector("#shadowScaleValue"),
-};
-const backgroundReadouts = {
-  backgroundBlur: document.querySelector("#backgroundBlurValue"),
-  backgroundBrightness: document.querySelector("#backgroundBrightnessValue"),
-  backgroundSaturation: document.querySelector("#backgroundSaturationValue"),
-};
-const cardSelect = document.querySelector("#cardSelect");
-const cardPoseInputs = {
-  x: document.querySelector("#cardX"),
-  y: document.querySelector("#cardY"),
-  z: document.querySelector("#cardZ"),
-  r: document.querySelector("#cardRotate"),
-  rx: document.querySelector("#cardRotateX"),
-  ry: document.querySelector("#cardRotateY"),
-  s: document.querySelector("#cardScale"),
-  blur: document.querySelector("#cardBlur"),
-  fade: document.querySelector("#cardFade"),
-  parallax: document.querySelector("#cardParallax"),
-};
-const cardPoseReadouts = {
-  label: document.querySelector("#cardSelectValue"),
-  x: document.querySelector("#cardXValue"),
-  y: document.querySelector("#cardYValue"),
-  z: document.querySelector("#cardZValue"),
-  r: document.querySelector("#cardRotateValue"),
-  rx: document.querySelector("#cardRotateXValue"),
-  ry: document.querySelector("#cardRotateYValue"),
-  s: document.querySelector("#cardScaleValue"),
-  blur: document.querySelector("#cardBlurValue"),
-  fade: document.querySelector("#cardFadeValue"),
-  parallax: document.querySelector("#cardParallaxValue"),
-};
+
 const focusSlotOrder = ["front", "left", "right", "back"];
-const focusSlotSelect = document.querySelector("#focusSlotSelect");
-const focusLayoutInputs = {
-  x: document.querySelector("#focusX"),
-  y: document.querySelector("#focusY"),
-  z: document.querySelector("#focusZ"),
-  r: document.querySelector("#focusRotate"),
-  rx: document.querySelector("#focusRotateX"),
-  ry: document.querySelector("#focusRotateY"),
-  s: document.querySelector("#focusScale"),
-  blur: document.querySelector("#focusBlur"),
-  fade: document.querySelector("#focusFade"),
-  sat: document.querySelector("#focusSat"),
-};
-const focusLayoutReadouts = {
-  label: document.querySelector("#focusSlotValue"),
-  x: document.querySelector("#focusXValue"),
-  y: document.querySelector("#focusYValue"),
-  z: document.querySelector("#focusZValue"),
-  r: document.querySelector("#focusRotateValue"),
-  rx: document.querySelector("#focusRotateXValue"),
-  ry: document.querySelector("#focusRotateYValue"),
-  s: document.querySelector("#focusScaleValue"),
-  blur: document.querySelector("#focusBlurValue"),
-  fade: document.querySelector("#focusFadeValue"),
-  sat: document.querySelector("#focusSatValue"),
-};
 
 const defaultCards = [
   {
@@ -245,11 +157,11 @@ let dragDeltaX = 0;
 let dragDeltaY = 0;
 let parallaxX = 0;
 let parallaxY = 0;
-let selectedCardIndex = 1;
-let selectedFocusSlot = "front";
 let isDragging = false;
+let isMouseDragging = false;
 let isSent = false;
 let introTimer = null;
+let sentResetTimer = null;
 let ripplePulseStartedAt = -2000;
 let rippleRenderer = null;
 let rippleScene = null;
@@ -258,14 +170,13 @@ let rippleMaterial = null;
 let rippleThree = null;
 let rippleReady = false;
 let pendingRipplePulse = false;
+let imuEnabled = false;
 
 const THREE_MODULE_URL = "./vendor/three.module.js";
-const RIPPLE_SETTINGS_KEY = "one-hop-ripple-settings";
-const BACKGROUND_SETTINGS_KEY = "one-hop-background-settings";
 const RIPPLE_TO_BLUR_DELAY_MS = 1450;
 const BACKGROUND_BLUR_DURATION_MS = 1000;
 const INTRO_DURATION_MS = RIPPLE_TO_BLUR_DELAY_MS + BACKGROUND_BLUR_DURATION_MS;
-const defaultRippleSettings = {
+const rippleSettings = {
   bendScale: 0.16,
   shearScale: 0.16,
   lightScale: 0.10,
@@ -276,13 +187,11 @@ const defaultRippleSettings = {
   gamma: 0.46,
   shadowScale: 0.34,
 };
-const defaultBackgroundSettings = {
+const backgroundSettings = {
   backgroundBlur: 16,
   backgroundBrightness: 0.78,
   backgroundSaturation: 0.88,
 };
-let rippleSettings = loadRippleSettings();
-let backgroundSettings = loadBackgroundSettings();
 
 const rippleVertexShader = `
   varying vec2 vUv;
@@ -493,55 +402,6 @@ function resizeRippleCanvas() {
   }
 }
 
-function loadRippleSettings() {
-  try {
-    const saved = JSON.parse(window.localStorage.getItem(RIPPLE_SETTINGS_KEY) || "{}");
-    return { ...defaultRippleSettings, ...saved };
-  } catch {
-    return { ...defaultRippleSettings };
-  }
-}
-
-function loadBackgroundSettings() {
-  try {
-    const saved = JSON.parse(window.localStorage.getItem(BACKGROUND_SETTINGS_KEY) || "{}");
-    return { ...defaultBackgroundSettings, ...saved };
-  } catch {
-    return { ...defaultBackgroundSettings };
-  }
-}
-
-function syncTunerControls() {
-  Object.entries(tunerInputs).forEach(([key, input]) => {
-    input.value = rippleSettings[key];
-  });
-  Object.entries(backgroundInputs).forEach(([key, input]) => {
-    input.value = backgroundSettings[key];
-  });
-  updateTunerReadouts();
-}
-
-function updateTunerReadouts() {
-  Object.entries(tunerReadouts).forEach(([key, readout]) => {
-    readout.textContent = Number(rippleSettings[key]).toFixed(2);
-  });
-  Object.entries(backgroundReadouts).forEach(([key, readout]) => {
-    readout.textContent = Number(backgroundSettings[key]).toFixed(2);
-  });
-}
-
-function readRippleSettingsFromControls() {
-  Object.entries(tunerInputs).forEach(([key, input]) => {
-    rippleSettings[key] = Number(input.value);
-  });
-  Object.entries(backgroundInputs).forEach(([key, input]) => {
-    backgroundSettings[key] = Number(input.value);
-  });
-  updateTunerReadouts();
-  applyRippleSettingsToShader();
-  applyBackgroundSettings();
-}
-
 function applyRippleSettingsToShader() {
   if (!rippleMaterial) return;
   rippleMaterial.uniforms.uBendScale.value = rippleSettings.bendScale;
@@ -559,43 +419,6 @@ function applyBackgroundSettings() {
   phone.style.setProperty("--background-blur", `${backgroundSettings.backgroundBlur}px`);
   phone.style.setProperty("--background-brightness", backgroundSettings.backgroundBrightness);
   phone.style.setProperty("--background-saturation", backgroundSettings.backgroundSaturation);
-}
-
-function previewRippleSettings() {
-  readRippleSettingsFromControls();
-  window.clearTimeout(introTimer);
-  activeIndex = null;
-  dragDeltaX = 0;
-  dragDeltaY = 0;
-  isSent = false;
-  state = 2;
-  tapHopButton.disabled = false;
-  startRipplePulse();
-  setStateClass();
-  renderCards();
-}
-
-async function acceptRippleSettings() {
-  readRippleSettingsFromControls();
-  window.localStorage.setItem(RIPPLE_SETTINGS_KEY, JSON.stringify(rippleSettings));
-  window.localStorage.setItem(BACKGROUND_SETTINGS_KEY, JSON.stringify(backgroundSettings));
-  acceptRippleButton.textContent = "saving";
-
-  try {
-    const response = await window.fetch("/api/ripple-settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ripple: rippleSettings, background: backgroundSettings }),
-    });
-    if (!response.ok) throw new Error("Save failed");
-    acceptRippleButton.textContent = "saved";
-  } catch {
-    acceptRippleButton.textContent = window.location.protocol === "file:" ? "local" : "saved?";
-  }
-
-  window.setTimeout(() => {
-    acceptRippleButton.textContent = "accept";
-  }, 900);
 }
 
 function startRipplePulse() {
@@ -721,57 +544,6 @@ function focusSlotToPose(slot, overrides = {}) {
   };
 }
 
-function populateFocusSlotSelect() {
-  focusSlotSelect.innerHTML = "";
-  focusSlotOrder.forEach((slot) => {
-    const option = document.createElement("option");
-    option.value = slot;
-    option.textContent = focusLayout[slot].label;
-    focusSlotSelect.appendChild(option);
-  });
-  focusSlotSelect.value = selectedFocusSlot;
-}
-
-function syncFocusLayoutControls() {
-  const values = focusLayout[selectedFocusSlot];
-  Object.entries(focusLayoutInputs).forEach(([key, input]) => {
-    input.value = values[key];
-  });
-  updateFocusLayoutReadouts(values);
-}
-
-function updateFocusLayoutReadouts(values = focusLayout[selectedFocusSlot]) {
-  focusLayoutReadouts.label.textContent = values.label;
-  focusLayoutReadouts.x.textContent = Math.round(values.x);
-  focusLayoutReadouts.y.textContent = Math.round(values.y);
-  focusLayoutReadouts.z.textContent = Math.round(values.z);
-  focusLayoutReadouts.r.textContent = Math.round(values.r);
-  focusLayoutReadouts.rx.textContent = Math.round(values.rx);
-  focusLayoutReadouts.ry.textContent = Math.round(values.ry);
-  focusLayoutReadouts.s.textContent = values.s.toFixed(2);
-  focusLayoutReadouts.blur.textContent = values.blur.toFixed(1);
-  focusLayoutReadouts.fade.textContent = values.fade.toFixed(2);
-  focusLayoutReadouts.sat.textContent = values.sat.toFixed(2);
-}
-
-function previewFocusLayout() {
-  const values = Object.fromEntries(
-    Object.entries(focusLayoutInputs).map(([key, input]) => [key, Number(input.value)]),
-  );
-  focusLayout[selectedFocusSlot] = {
-    ...focusLayout[selectedFocusSlot],
-    ...values,
-  };
-  updateFocusLayoutReadouts(focusLayout[selectedFocusSlot]);
-  if (state !== 4) {
-    activeIndex = Math.min(selectedCardIndex, cards.length - 1);
-    state = 4;
-    isSent = false;
-    setStateClass();
-  }
-  renderCards();
-}
-
 async function loadFocusLayoutFromJson() {
   if (window.location.protocol === "file:") {
     return;
@@ -783,140 +555,9 @@ async function loadFocusLayoutFromJson() {
     });
     if (!response.ok) return;
     focusLayout = normalizeFocusLayout(await response.json());
-    populateFocusSlotSelect();
-    syncFocusLayoutControls();
     renderCards();
   } catch (error) {
     console.info("Using built-in focus layout because focus-layout.json could not be loaded.", error);
-  }
-}
-
-async function acceptFocusLayoutSettings() {
-  previewFocusLayout();
-  acceptFocusLayoutButton.textContent = "saving";
-
-  try {
-    const response = await window.fetch("/api/focus-layout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(focusLayout),
-    });
-    if (!response.ok) throw new Error("Save failed");
-    acceptFocusLayoutButton.textContent = "saved";
-  } catch {
-    acceptFocusLayoutButton.textContent = window.location.protocol === "file:" ? "local" : "saved?";
-  }
-
-  window.setTimeout(() => {
-    acceptFocusLayoutButton.textContent = "accept";
-  }, 900);
-}
-
-function populateCardSelect() {
-  cardSelect.innerHTML = "";
-  cards.forEach((card, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = card.label || card.subLabel || card.id || `卡片 ${index + 1}`;
-    cardSelect.appendChild(option);
-  });
-  selectedCardIndex = Math.min(selectedCardIndex, cards.length - 1);
-  cardSelect.value = String(selectedCardIndex);
-}
-
-function syncCardControls() {
-  if (!cards.length) return;
-  const card = cards[selectedCardIndex] || cards[0];
-  const values = poseToControlValues(card.pose);
-  Object.entries(cardPoseInputs).forEach(([key, input]) => {
-    input.value = values[key];
-  });
-  updateCardReadouts(values);
-}
-
-function updateCardReadouts(values = poseToControlValues(cards[selectedCardIndex].pose)) {
-  const card = cards[selectedCardIndex] || cards[0];
-  cardPoseReadouts.label.textContent = card.label || card.subLabel || card.id || "未命名";
-  cardPoseReadouts.x.textContent = Math.round(values.x);
-  cardPoseReadouts.y.textContent = Math.round(values.y);
-  cardPoseReadouts.z.textContent = Math.round(values.z);
-  cardPoseReadouts.r.textContent = Math.round(values.r);
-  cardPoseReadouts.rx.textContent = Math.round(values.rx);
-  cardPoseReadouts.ry.textContent = Math.round(values.ry);
-  cardPoseReadouts.s.textContent = values.s.toFixed(2);
-  cardPoseReadouts.blur.textContent = values.blur.toFixed(1);
-  cardPoseReadouts.fade.textContent = values.fade.toFixed(2);
-  cardPoseReadouts.parallax.textContent = Math.round(values.parallax);
-}
-
-function previewCardPose() {
-  const values = Object.fromEntries(
-    Object.entries(cardPoseInputs).map(([key, input]) => [key, Number(input.value)]),
-  );
-  const card = cards[selectedCardIndex];
-  card.pose = controlValuesToPose(values, card.pose);
-  updateCardReadouts(values);
-  if (state < 3) {
-    window.clearTimeout(introTimer);
-    activeIndex = null;
-    dragDeltaX = 0;
-    dragDeltaY = 0;
-    isSent = false;
-    state = 3;
-    setStateClass();
-  }
-  renderCards();
-}
-
-function exportCardsForJson() {
-  return cards.map((card) => ({
-    id: card.id,
-    label: card.label,
-    "sub-label": card.subLabel,
-    "label-fill": card.labelFill,
-    image: card.image,
-    pose: card.pose,
-  }));
-}
-
-async function acceptCardSettings() {
-  previewCardPose();
-  acceptCardsButton.textContent = "saving";
-
-  try {
-    const response = await window.fetch("/api/cards", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(exportCardsForJson()),
-    });
-    if (!response.ok) throw new Error("Save failed");
-    acceptCardsButton.textContent = "saved";
-  } catch {
-    acceptCardsButton.textContent = window.location.protocol === "file:" ? "local" : "saved?";
-  }
-
-  window.setTimeout(() => {
-    acceptCardsButton.textContent = "accept";
-  }, 900);
-}
-
-async function loadCardsFromJson() {
-  if (window.location.protocol === "file:") {
-    return;
-  }
-
-  try {
-    const response = await fetch(`./data/cards.json?v=${Date.now()}`, {
-      cache: "no-store",
-    });
-    if (!response.ok) return;
-    const data = await response.json();
-    cards = normalizeCards(data);
-    createCards();
-    populateCardSelect();
-    syncCardControls();
-  } catch (error) {
-    console.info("Using built-in cards because cards.json could not be loaded.", error);
   }
 }
 
@@ -958,7 +599,20 @@ function createCards() {
       }
       node.append(label);
     }
-    node.addEventListener("pointerdown", (event) => event.preventDefault());
+    node.addEventListener("pointerdown", (event) => {
+      event.preventDefault();
+      if (activeIndex !== null) {
+        beginCardDrag(event);
+        event.stopPropagation();
+      }
+    });
+    node.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      if (activeIndex !== null) {
+        beginMouseCardDrag(event);
+        event.stopPropagation();
+      }
+    });
     node.addEventListener("click", () => focusCard(index));
     cardSpace.appendChild(node);
   });
@@ -1001,7 +655,7 @@ function renderCards() {
           x: front.x + dragDeltaX,
           y: front.y + Math.min(0, dragDeltaY / 2),
           r: front.r + dragDeltaX / 30,
-          rx: front.rx + Math.min(8, Math.max(-8, dragDeltaY / 18)),
+          rx: front.rx + Math.min(28, Math.max(-8, -dragDeltaY / 7)),
           ry: front.ry + Math.min(10, Math.max(-10, -dragDeltaX / 18)),
         }),
         layer: 70,
@@ -1072,6 +726,7 @@ function resetToScatter() {
 
 function resetDemo() {
   window.clearTimeout(introTimer);
+  window.clearTimeout(sentResetTimer);
   activeIndex = null;
   dragDeltaX = 0;
   dragDeltaY = 0;
@@ -1080,7 +735,6 @@ function resetDemo() {
   isSent = false;
   state = 1;
   stageLabel.textContent = "卡片选择";
-  tapHopButton.disabled = false;
   setStateClass();
   renderCards();
 }
@@ -1102,6 +756,7 @@ function setState(next) {
 function setStateClass() {
   phone.classList.remove("state-1", "state-2", "state-3", "state-4");
   phone.classList.toggle("sent", isSent);
+  phone.classList.toggle("sending-preview", activeIndex !== null && isDragging && dragDeltaY < -8 && !isSent);
   phone.classList.add(`state-${state}`);
   shareHint.style.setProperty("--share-pull", `${Math.min(0, dragDeltaY / 3)}px`);
 }
@@ -1109,31 +764,34 @@ function setStateClass() {
 function playIntro() {
   if (state !== 1 && state !== 3) return;
   window.clearTimeout(introTimer);
+  window.clearTimeout(sentResetTimer);
   activeIndex = null;
   dragDeltaX = 0;
   dragDeltaY = 0;
   isSent = false;
-  tapHopButton.disabled = true;
   startRipplePulse();
   setState(2);
   introTimer = window.setTimeout(() => {
     if (state === 2) {
       resetToScatter();
-      tapHopButton.disabled = false;
     }
   }, INTRO_DURATION_MS);
 }
 
 function sendActiveCard() {
   if (activeIndex === null) return;
+  window.clearTimeout(sentResetTimer);
   isSent = true;
   dragDeltaX = 0;
   dragDeltaY = 0;
   sentTitle.textContent = cards[activeIndex].label || cards[activeIndex].subLabel || cards[activeIndex].id;
   setStateClass();
+  sentResetTimer = window.setTimeout(() => {
+    resetDemo();
+  }, 980);
 }
 
-function updateScatterParallax(event) {
+function updateScatterParallaxMouse(event) {
   if (activeIndex !== null || state < 3) return;
   const rect = cardSpace.getBoundingClientRect();
   const x = (event.clientX - rect.left) / rect.width - 0.5;
@@ -1143,18 +801,160 @@ function updateScatterParallax(event) {
   renderCards();
 }
 
-cardSpace.addEventListener("pointerdown", (event) => {
-  if (activeIndex === null) return;
+function handleDeviceOrientation(event) {
+  if (activeIndex !== null || state < 3) return;
+  const gamma = event.gamma || 0;
+  const beta = event.beta || 0;
+  parallaxX = Math.max(-1, Math.min(1, gamma / 35));
+  parallaxY = Math.max(-1, Math.min(1, (beta - 60) / 35));
+  renderCards();
+
+  const debug = document.getElementById('imuDebug');
+  if (debug) {
+    debug.textContent = `γ:${gamma.toFixed(1)} β:${beta.toFixed(1)} px:${parallaxX.toFixed(2)} py:${parallaxY.toFixed(2)}`;
+    debug.style.opacity = '1';
+  }
+}
+
+async function requestIMUPermission() {
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try {
+      const response = await DeviceOrientationEvent.requestPermission();
+      return response === 'granted';
+    } catch (e) {
+      return false;
+    }
+  }
+  return true;
+}
+
+async function enableIMU() {
+  if (imuEnabled) return;
+  const granted = await requestIMUPermission();
+  if (granted) {
+    imuEnabled = true;
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
+
+    const debug = document.getElementById('imuDebug');
+    if (debug) {
+      debug.textContent = 'IMU: listening...';
+      debug.style.opacity = '1';
+    }
+
+    window.setTimeout(() => {
+      const d = document.getElementById('imuDebug');
+      if (d && d.textContent.includes('listening')) {
+        d.textContent = 'IMU: unavailable';
+        d.style.color = '#f55';
+      }
+    }, 3000);
+  }
+}
+
+function beginCardDrag(event) {
+  if (activeIndex === null || isDragging) return;
   isDragging = true;
   dragStartX = event.clientX;
   dragStartY = event.clientY;
   dragDeltaX = 0;
   dragDeltaY = 0;
   cardSpace.setPointerCapture(event.pointerId);
+}
+
+function beginMouseCardDrag(event) {
+  if (activeIndex === null || isDragging) return;
+  isDragging = true;
+  isMouseDragging = true;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+  dragDeltaX = 0;
+  dragDeltaY = 0;
+}
+
+function updateCardDrag(clientX, clientY) {
+  dragDeltaX = Math.max(-92, Math.min(92, clientX - dragStartX));
+  dragDeltaY = Math.max(-150, Math.min(50, clientY - dragStartY));
+  if (Math.abs(dragDeltaY) > Math.abs(dragDeltaX) * 1.2) {
+    dragDeltaX = 0;
+  }
+  setStateClass();
+  renderCards();
+}
+
+function finishCardDrag() {
+  isDragging = false;
+  isMouseDragging = false;
+  if (activeIndex !== null && dragDeltaY < -78) {
+    sendActiveCard();
+    return;
+  }
+  const threshold = 42;
+  if (dragDeltaX > threshold) {
+    dragDeltaX = 0;
+    moveActive(-1);
+    return;
+  }
+  if (dragDeltaX < -threshold) {
+    dragDeltaX = 0;
+    moveActive(1);
+    return;
+  }
+  dragDeltaX = 0;
+  dragDeltaY = 0;
+  setStateClass();
+  renderCards();
+}
+
+let lastTapTime = 0;
+let lastTapX = 0;
+let lastTapY = 0;
+
+function onDoubleTap(event) {
+  const now = Date.now();
+  const dt = now - lastTapTime;
+  const dist = Math.hypot(event.clientX - lastTapX, event.clientY - lastTapY);
+
+  if (dt < 350 && dist < 50) {
+    event.preventDefault();
+    enableIMU();
+    playIntro();
+  }
+
+  lastTapTime = now;
+  lastTapX = event.clientX;
+  lastTapY = event.clientY;
+}
+
+async function loadCardsFromJson() {
+  if (window.location.protocol === "file:") {
+    return;
+  }
+
+  try {
+    const response = await fetch(`./data/cards.json?v=${Date.now()}`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+    cards = normalizeCards(data);
+    createCards();
+  } catch (error) {
+    console.info("Using built-in cards because cards.json could not be loaded.", error);
+  }
+}
+
+proximityTrigger.addEventListener("pointerdown", onDoubleTap);
+
+cardSpace.addEventListener("pointerdown", (event) => {
+  beginCardDrag(event);
+});
+
+cardSpace.addEventListener("mousedown", (event) => {
+  beginMouseCardDrag(event);
 });
 
 cardSpace.addEventListener("click", (event) => {
-  if (activeIndex !== null) return;
+  if (activeIndex !== null || state !== 3) return;
   const directCard = document
     .elementsFromPoint(event.clientX, event.clientY)
     .find((element) => element.classList?.contains("hop-card"));
@@ -1182,37 +982,26 @@ cardSpace.addEventListener("click", (event) => {
 
 cardSpace.addEventListener("pointermove", (event) => {
   if (!isDragging) {
-    updateScatterParallax(event);
+    if (!imuEnabled) updateScatterParallaxMouse(event);
     return;
   }
-  dragDeltaX = Math.max(-92, Math.min(92, event.clientX - dragStartX));
-  dragDeltaY = Math.max(-150, Math.min(50, event.clientY - dragStartY));
-  if (Math.abs(dragDeltaY) > Math.abs(dragDeltaX) * 1.2) {
-    dragDeltaX = 0;
-  }
-  setStateClass();
-  renderCards();
+  updateCardDrag(event.clientX, event.clientY);
 });
 
 cardSpace.addEventListener("pointerup", (event) => {
   if (!isDragging) return;
   cardSpace.releasePointerCapture(event.pointerId);
-  isDragging = false;
-  const threshold = 42;
-  if (dragDeltaX > threshold) {
-    dragDeltaX = 0;
-    moveActive(-1);
-    return;
-  }
-  if (dragDeltaX < -threshold) {
-    dragDeltaX = 0;
-    moveActive(1);
-    return;
-  }
-  dragDeltaX = 0;
-  dragDeltaY = 0;
-  setStateClass();
-  renderCards();
+  finishCardDrag();
+});
+
+window.addEventListener("mousemove", (event) => {
+  if (!isMouseDragging) return;
+  updateCardDrag(event.clientX, event.clientY);
+});
+
+window.addEventListener("mouseup", () => {
+  if (!isMouseDragging) return;
+  finishCardDrag();
 });
 
 cardSpace.addEventListener("pointerleave", () => {
@@ -1228,41 +1017,9 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") resetToScatter();
 });
 
-tapHopButton.addEventListener("click", playIntro);
-resetDemoButton.addEventListener("click", resetDemo);
-proximityTrigger.addEventListener("click", playIntro);
-acceptRippleButton.addEventListener("click", acceptRippleSettings);
-acceptCardsButton.addEventListener("click", acceptCardSettings);
-acceptFocusLayoutButton.addEventListener("click", acceptFocusLayoutSettings);
-Object.values(tunerInputs).forEach((input) => {
-  input.addEventListener("input", previewRippleSettings);
-});
-Object.values(backgroundInputs).forEach((input) => {
-  input.addEventListener("input", previewRippleSettings);
-});
-cardSelect.addEventListener("change", () => {
-  selectedCardIndex = Number(cardSelect.value);
-  syncCardControls();
-});
-Object.values(cardPoseInputs).forEach((input) => {
-  input.addEventListener("input", previewCardPose);
-});
-focusSlotSelect.addEventListener("change", () => {
-  selectedFocusSlot = focusSlotSelect.value;
-  syncFocusLayoutControls();
-});
-Object.values(focusLayoutInputs).forEach((input) => {
-  input.addEventListener("input", previewFocusLayout);
-});
-
-syncTunerControls();
 applyBackgroundSettings();
 setupRippleRenderer();
 createCards();
-populateCardSelect();
-syncCardControls();
-populateFocusSlotSelect();
-syncFocusLayoutControls();
 loadCardsFromJson();
 loadFocusLayoutFromJson();
 setState(1);
