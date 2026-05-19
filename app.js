@@ -830,16 +830,20 @@ async function requestIMUPermission() {
 
 async function enableIMU() {
   if (imuEnabled) return;
+  const debug = document.getElementById('imuDebug');
+  const btn = document.getElementById('imuBtn');
+
+  if (debug) {
+    debug.textContent = 'IMU: requesting...';
+    debug.style.opacity = '1';
+  }
+
   const granted = await requestIMUPermission();
   if (granted) {
     imuEnabled = true;
     window.addEventListener('deviceorientation', handleDeviceOrientation);
-
-    const debug = document.getElementById('imuDebug');
-    if (debug) {
-      debug.textContent = 'IMU: listening...';
-      debug.style.opacity = '1';
-    }
+    if (debug) debug.textContent = 'IMU: listening...';
+    if (btn) btn.style.display = 'none';
 
     window.setTimeout(() => {
       const d = document.getElementById('imuDebug');
@@ -848,8 +852,43 @@ async function enableIMU() {
         d.style.color = '#f55';
       }
     }, 3000);
+  } else {
+    if (debug) {
+      debug.textContent = 'IMU: permission denied';
+      debug.style.color = '#f55';
+    }
+    if (btn) btn.style.display = 'block';
   }
 }
+
+// iOS Safari 需要显式按钮来请求陀螺仪权限
+document.getElementById('imuBtn')?.addEventListener('click', async () => {
+  const debug = document.getElementById('imuDebug');
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    try {
+      const response = await DeviceOrientationEvent.requestPermission();
+      if (response === 'granted') {
+        imuEnabled = true;
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
+        if (debug) {
+          debug.textContent = 'IMU: listening...';
+          debug.style.color = '#0f0';
+        }
+        document.getElementById('imuBtn').style.display = 'none';
+      } else {
+        if (debug) {
+          debug.textContent = 'IMU: denied';
+          debug.style.color = '#f55';
+        }
+      }
+    } catch (e) {
+      if (debug) {
+        debug.textContent = 'IMU: error';
+        debug.style.color = '#f55';
+      }
+    }
+  }
+});
 
 function beginCardDrag(event) {
   if (activeIndex === null || isDragging) return;
