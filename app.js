@@ -805,12 +805,24 @@ function updateScatterParallaxMouse(event) {
 
 function handleDeviceOrientation(event) {
   if (activeIndex !== null || state < 3) return;
-  if (performance.now() < imuScatterReadyAt) return;
+
   const gamma = event.gamma || 0;
   const beta = event.beta || 0;
-  parallaxX = Math.max(-1, Math.min(1, gamma / 35));
-  parallaxY = Math.max(-1, Math.min(1, (beta - 60) / 35));
-  renderCards();
+
+  // gamma: 绕 Y 轴（长边）旋转 → 卡片沿 X 轴（短边）位移
+  // beta:  绕 X 轴（短边）旋转 → 卡片沿 Y 轴（长边）位移
+  const targetX = Math.max(-1, Math.min(1, gamma / 35));
+  const targetY = Math.max(-1, Math.min(1, (beta - 60) / 35));
+
+  // 平滑滤波，消除陀螺仪高频抖动和锁定期结束后的跳变
+  const smoothing = 0.12;
+  parallaxX += (targetX - parallaxX) * smoothing;
+  parallaxY += (targetY - parallaxY) * smoothing;
+
+  // 只有在卡片入场动画完成后才实际渲染，避免与 CSS 动画竞争
+  if (performance.now() >= imuScatterReadyAt) {
+    renderCards();
+  }
 
   const debug = document.getElementById('imuDebug');
   if (debug) {
