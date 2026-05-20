@@ -171,6 +171,7 @@ let rippleThree = null;
 let rippleReady = false;
 let pendingRipplePulse = false;
 let imuEnabled = false;
+let imuScatterReadyAt = 0;
 
 const THREE_MODULE_URL = "./vendor/three.module.js";
 const RIPPLE_TO_BLUR_DELAY_MS = 1450;
@@ -722,6 +723,7 @@ function resetToScatter() {
   stageLabel.textContent = "卡片选择";
   setStateClass();
   renderCards();
+  imuScatterReadyAt = performance.now() + 1000;
 }
 
 function resetDemo() {
@@ -803,6 +805,7 @@ function updateScatterParallaxMouse(event) {
 
 function handleDeviceOrientation(event) {
   if (activeIndex !== null || state < 3) return;
+  if (performance.now() < imuScatterReadyAt) return;
   const gamma = event.gamma || 0;
   const beta = event.beta || 0;
   parallaxX = Math.max(-1, Math.min(1, gamma / 35));
