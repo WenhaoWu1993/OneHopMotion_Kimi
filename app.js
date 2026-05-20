@@ -172,6 +172,9 @@ let rippleReady = false;
 let pendingRipplePulse = false;
 let imuEnabled = false;
 let imuScatterReadyAt = 0;
+let imuNeutralX = 0;
+let imuNeutralY = 0;
+let imuNeutralSet = false;
 
 const THREE_MODULE_URL = "./vendor/three.module.js";
 const RIPPLE_TO_BLUR_DELAY_MS = 1450;
@@ -724,6 +727,7 @@ function resetToScatter() {
   setStateClass();
   renderCards();
   imuScatterReadyAt = performance.now() + 1000;
+  imuNeutralSet = false;
 }
 
 function resetDemo() {
@@ -803,18 +807,27 @@ function updateScatterParallaxMouse(event) {
   renderCards();
 }
 
-function handleDeviceOrientation(event) {
+function handleDeviceMotion(event) {
   if (activeIndex !== null || state < 3) return;
 
-  const gamma = event.gamma || 0;
-  const beta = event.beta || 0;
+  const accel = event.accelerationIncludingGravity;
+  if (!accel) return;
 
-  // gamma: 绕 Y 轴（长边）旋转 → 卡片沿 X 轴（短边）位移
-  // beta:  绕 X 轴（短边）旋转 → 卡片沿 Y 轴（长边）位移
-  const targetX = Math.max(-1, Math.min(1, gamma / 35));
-  const targetY = Math.max(-1, Math.min(1, (beta - 60) / 35));
+  const mag = Math.sqrt(accel.x * accel.x + accel.y * accel.y + accel.z * accel.z) || 1;
+  const nx = accel.x / mag;
+  const ny = accel.y / mag;
 
-  // 平滑滤波，消除陀螺仪高频抖动和锁定期结束后的跳变
+  // 首次在有效状态下收到数据时记录中性姿态（用户当前的握持角度即为零位）
+  if (!imuNeutralSet) {
+    imuNeutralX = nx;
+    imuNeutralY = ny;
+    imuNeutralSet = true;
+  }
+
+  // 相对于中性姿态的偏移量；系数 2.5 约对应 ±35° 倾斜达到视差上限 ±1
+  const targetX = Math.max(-1, Math.min(1, (nx - imuNeutralX) * 2.5));
+  const targetY = Math.max(-1, Math.min(1, (ny - imuNeutralY) * 2.5));
+
   const smoothing = 0.12;
   parallaxX += (targetX - parallaxX) * smoothing;
   parallaxY += (targetY - parallaxY) * smoothing;
@@ -823,15 +836,17 @@ function handleDeviceOrientation(event) {
   if (performance.now() >= imuScatterReadyAt) {
     renderCards();
   }
-
-  const debug = document.getElementById('imuDebug');
-  if (debug) {
-    debug.textContent = `γ:${gamma.toFixed(1)} β:${beta.toFixed(1)} px:${parallaxX.toFixed(2)} py:${parallaxY.toFixed(2)}`;
-    debug.style.opacity = '1';
-  }
 }
 
 async function requestIMUPermission() {
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const response = await DeviceMotionEvent.requestPermission();
+      return response === 'granted';
+    } catch (e) {
+      return false;
+    }
+  }
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     try {
       const response = await DeviceOrientationEvent.requestPermission();
@@ -845,68 +860,32 @@ async function requestIMUPermission() {
 
 async function enableIMU() {
   if (imuEnabled) return;
-  const debug = document.getElementById('imuDebug');
   const btn = document.getElementById('imuBtn');
-
-  if (debug) {
-    debug.textContent = 'IMU: requesting...';
-    debug.style.opacity = '1';
-  }
 
   const granted = await requestIMUPermission();
   if (granted) {
     imuEnabled = true;
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-    if (debug) {
-      debug.textContent = 'IMU: on';
-      debug.style.color = '#0f0';
-      window.setTimeout(() => { debug.style.opacity = '0'; }, 1200);
-    }
+    imuNeutralSet = false;
+    window.addEventListener('devicemotion', handleDeviceMotion);
     if (btn) btn.style.display = 'none';
-
-    window.setTimeout(() => {
-      const d = document.getElementById('imuDebug');
-      if (d && d.textContent === 'IMU: on') {
-        d.textContent = 'IMU: unavailable';
-        d.style.color = '#f55';
-        d.style.opacity = '1';
-      }
-    }, 3000);
   } else {
-    if (debug) {
-      debug.textContent = 'IMU: permission denied';
-      debug.style.color = '#f55';
-    }
     if (btn) btn.style.display = 'block';
   }
 }
 
 // iOS Safari 需要显式按钮来请求陀螺仪权限
 document.getElementById('imuBtn')?.addEventListener('click', async () => {
-  const debug = document.getElementById('imuDebug');
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
     try {
-      const response = await DeviceOrientationEvent.requestPermission();
+      const response = await DeviceMotionEvent.requestPermission();
       if (response === 'granted') {
         imuEnabled = true;
-        window.addEventListener('deviceorientation', handleDeviceOrientation);
-        if (debug) {
-          debug.textContent = 'IMU: on';
-          debug.style.color = '#0f0';
-          window.setTimeout(() => { debug.style.opacity = '0'; }, 1200);
-        }
+        imuNeutralSet = false;
+        window.addEventListener('devicemotion', handleDeviceMotion);
         document.getElementById('imuBtn').style.display = 'none';
-      } else {
-        if (debug) {
-          debug.textContent = 'IMU: denied';
-          debug.style.color = '#f55';
-        }
       }
     } catch (e) {
-      if (debug) {
-        debug.textContent = 'IMU: error';
-        debug.style.color = '#f55';
-      }
+      // ignore
     }
   }
 });
